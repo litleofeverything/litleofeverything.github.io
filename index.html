@@ -318,6 +318,11 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
 .card .weekb svg{width:16px;height:16px}
 .v-list .weekb,.v-text .weekb{top:50%;transform:translateY(-50%);box-shadow:none;border:1px solid var(--line);inset-inline-end:44px}
 @media(max-width:600px){.card .weekb{width:32px;height:32px;top:6px;inset-inline-end:78px}.card .weekb svg{width:15px;height:15px}}
+.hlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hlinks .btn{min-height:46px;padding:8px 18px;font-size:15px}
+.hlinks b{background:#fff;color:var(--acc);font-size:12px;border-radius:99px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center}
+.hlinks b:empty{display:none}
+@media(max-width:600px){.hlinks .btn{flex:1;justify-content:center;font-size:14px;padding:8px 12px}}
 .wcust{display:flex;gap:8px;margin-top:8px}
 .wcust input{flex:1}
 @media(max-width:600px){.wpick{align-items:end;padding:0}.wbox{border-radius:20px 20px 0 0;max-height:88vh;width:100%}.wdays{grid-template-columns:1fr}.weekw{padding-block:16px 100px}}
@@ -365,6 +370,7 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
     <input id="q" type="search" placeholder="ابحثي: دجاج، زعفران، चावल…" aria-label="بحث في الوصفات" autocomplete="off">
     <button type="button" id="rnd">اقترح طبق</button>
    </form>
+   <div class="hlinks"><a class="btn main" href="#week"><svg aria-hidden="true"><use href="#i-cal"/></svg>قائمة الأسبوع<b id="wkN"></b></a><a class="btn" href="#shop"><svg aria-hidden="true"><use href="#i-cart"/></svg>قائمة المشتريات</a></div>
   </div>
   <div class="mosaic" aria-hidden="true">
    <div class="tile t-chk"><span class="plate"></span><svg class="dish"><use href="#d-chk"/></svg></div><div class="tile t-rice"><span class="plate"></span><svg class="dish"><use href="#d-rice"/></svg></div><div class="tile t-sea"><span class="plate"></span><svg class="dish"><use href="#d-sea"/></svg></div>
@@ -524,7 +530,7 @@ function chips(){
  $('#chips').innerHTML=['all','fav','tried',...TAGS].map(t=>`<button type="button" class="chip" data-f="${t}" aria-pressed="${filter===t}"><span class="ci t-${CAT[t]}"><svg aria-hidden="true"><use href="#d-${CAT[t]}"/></svg></span>${t==='all'?'الكل':t==='fav'?'المفضلة':t==='tried'?'جرّبتها':t}<b>${n(t)}</b></button>`).join('');
 }
 function list(){
- meals();chips();
+ meals();chips();{const b=$('#wkN');if(b)b.textContent=wCount()||''}
  const terms=norm(q).split(/\s+/).filter(Boolean);
  const rs=R.filter(r=>(meal==='all'||mealOf(r)===meal)&&(filter==='all'||(filter==='fav'?fav.has(r.id):filter==='tried'?!!(tried[r.id]&&tried[r.id].d):r.tags.includes(filter)))&&terms.every(t=>r.idx.includes(t)));
  $('#count').textContent=rs.length?`${rs.length} وصفة`:'';
