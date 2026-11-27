@@ -612,7 +612,7 @@ function route(){
 document.querySelector('.views').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;view=b.dataset.v;store.set('hr_view',view);list()});
 $('#q').addEventListener('input',e=>{q=e.target.value;list()});
 $('#sf').addEventListener('submit',e=>e.preventDefault());
-$('#meals').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;meal=b.dataset.m;store.set('hr_meal',meal);list()});
+$('#meals').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;if(b.dataset.m!==meal){filter='all';store.set('hr_filter',filter)}meal=b.dataset.m;store.set('hr_meal',meal);list()});
 $('#chips').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;store.set('hr_filter',filter);list()});
 $('#grid').addEventListener('click',e=>{const w=e.target.closest('[data-wk]');if(w){e.preventDefault();pickRecipe(rById(+w.dataset.wk));return}const s=e.target.closest('[data-sel]');if(s){e.preventDefault();toggleSel(+s.dataset.sel);list();return}const b=e.target.closest('[data-fav]');if(!b)return;e.preventDefault();toggleFav(+b.dataset.fav);list()});
 $('#rnd').addEventListener('click',()=>{const pool=[...document.querySelectorAll('#grid .card')];const a=pool[Math.floor(Math.random()*pool.length)];if(a)location.hash=a.getAttribute('href')});
