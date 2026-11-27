@@ -542,7 +542,7 @@ function list(){
   <button type="button" class="cartb" data-sel="${r.id}" aria-pressed="${sel.has(r.id)}" aria-label="قائمة المشتريات" title="أضيفي لقائمة المشتريات">${ico(sel.has(r.id)?'check':'cart')}</button>
   <button type="button" class="weekb" data-wk="${r.id}" aria-pressed="${inWeek(r.id)}" aria-label="${W().addBtn}" title="${W().addBtn}">${ico('cal')}</button>
   <button type="button" class="favb" data-fav="${r.id}" aria-label="المفضلة" aria-pressed="${fav.has(r.id)}">${ico(fav.has(r.id)?'heartf':'heart')}</button></div>
-  <div class="cb"><p class="kicker">${r.tags.map(esc).join(' · ')}</p><h3>${esc(r.ar)}</h3><div class="hi">${txt(r.hi)}</div>
+  <div class="cb"><p class="kicker">${[mealOf(r),...r.tags].map(esc).join(' · ')}</p><h3>${esc(r.ar)}</h3><div class="hi">${txt(r.hi)}</div>
   <div class="meta">${r.nI?`<span>${ico('list')}${r.nI} مكوّن</span>`:''}<span>${ico('pot')}${tot?tot+' خطوة':'طريقة بالفيديو'}</span>${r.videos.length?`<span>${ico('play')}فيديو</span>`:''}</div>
   ${d&&tot?`<div class="bar" title="${d}/${tot}"><i style="width:${100*d/tot}%"></i></div>`:''}</div>
 </a>`}).join('')
@@ -556,7 +556,7 @@ function detail(r){
  const steps=r.blocks.filter(b=>b.t==='step');
  const _v=r.videos.map(u=>`<a class="btn main" href="${esc(u)}" target="_blank" rel="noopener">${ico('play')}${vlabel(u)}</a>`).join('');
  $('#detail').innerHTML=`<header class="dhead"><div class="wrap dgrid"><div>
-  <nav class="crumb"><a href="#all">الوصفات</a> / ${r.tags.map(esc).join(' · ')}</nav>
+  <nav class="crumb"><a href="#all">الوصفات</a> / <b>${esc(mealOf(r))}</b>${r.tags.length?' / '+r.tags.map(esc).join(' · '):''}</nav>
   <h1>${esc(r.ar)}</h1><div class="hi">${txt(r.hi)}</div>
   <ul class="facts"><li><b>${r.nI||'—'}</b>مكوّن</li><li><b>${r.steps.length||'—'}</b>خطوة</li><li><b>${r.videos.length||'—'}</b>فيديو</li></ul>
   <div class="acts">
