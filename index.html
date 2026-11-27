@@ -303,6 +303,13 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
 .wgrid span{font-size:12.5px;color:var(--mut);text-align:center}
 .wgrid button{border:1px solid var(--line);background:var(--bg);border-radius:12px;min-height:40px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
 .wgrid button.on{background:var(--herb);border-color:var(--herb);color:#fff}
+.wsl{display:flex;flex-wrap:wrap;gap:6px}
+.wsl button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:6px 14px;min-height:40px;font:inherit;font-size:14px;color:var(--ink);cursor:pointer}
+.wsl button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.wdg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+.wdg button{border:1px solid var(--line);background:var(--bg);border-radius:12px;min-height:46px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer}
+.wdg button.on{background:var(--herb);border-color:var(--herb);color:#fff}
+.wadd{min-width:44px}
 .wcust{display:flex;gap:8px;margin-top:8px}
 .wcust input{flex:1}
 @media(max-width:600px){.wpick{align-items:end;padding:0}.wbox{border-radius:20px 20px 0 0;max-height:88vh;width:100%}.wdays{grid-template-columns:1fr}.weekw{padding-block:16px 100px}}
@@ -628,8 +635,13 @@ document.addEventListener('keydown',e=>{if($('#cook').hidden)return;if(e.key==='
 document.querySelector('.langs').addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(!b)return;ulang=b.dataset.lang;store.set('hr_lang',ulang);applyLang();$('#cook').hidden=true;route();toast({ar:'الوصفات بالعربي',en:'Recipes in English',hi:'الوصفات بالهندي',am:'የምግብ አዘገጃጀቶች በአማርኛ',om:'Qophiiwwan Afaan Oromootiin'}[ulang])});
 document.querySelector('.langsel').addEventListener('change',e=>{const b=document.querySelector('.langs [data-lang="'+e.target.value+'"]');if(b)b.click()});
 
-const DAYS=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'],SLOTS=[['b','فطور'],['l','غداء'],['d','عشاء']];
-let wk=store.get('hr_week',{});const saveWk=()=>store.set('hr_week',wk);
+const DAYS=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+const SLOTS=[['s','سلطة',['سلطات']],['p','شوربة',['شوربات']],['m','طبق رئيسي ١',['أطباق رئيسية','أطباق صحية']],['n','طبق رئيسي ٢',['أطباق رئيسية','أطباق صحية']],['w','حلويات',['حلويات']],['a','مقبلات',['مقبلات']]];
+const slotOf=r=>(SLOTS.find(x=>x[2].includes(mealOf(r)))||SLOTS[2])[0];
+const slotName=s=>SLOTS.find(x=>x[0]===s)[1];
+let wk=store.get('hr_week',{});
+if(Object.keys(wk).some(k=>/[bld]$/.test(k))){const o=wk;wk={};Object.entries(o).forEach(([k,l])=>(l||[]).forEach(e=>{const r=e.id&&R.find(x=>x.id===e.id);let s=r?slotOf(r):'m';if(s==='m'&&(wk[k[0]+'m']||[]).length)s='n';(wk[k[0]+s]=wk[k[0]+s]||[]).push(e)}));store.set('hr_week',wk)}
+const saveWk=()=>store.set('hr_week',wk);
 const todayI=()=>(new Date().getDay()+1)%7;
 const wcell=(d,s)=>(wk[d+s]=wk[d+s]||[]);
 const rById=id=>R.find(r=>r.id===id);
@@ -639,37 +651,37 @@ function weekView(){
  const n=wCount(),ids=wIds(),ti=todayI();
  $('#week').innerHTML=`<header class="band alt"><div class="wrap dtop">
   <a class="back" href="#all">→ كل الوصفات</a><h1>قائمة الأسبوع</h1>
-  <p class="stat">${n?`<b>${n}</b> ${n===1?'وجبة':'وجبات'} مخططة · ${ids.length} ${ids.length===1?'وصفة':'وصفات'}`:'خططي وجبات الأسبوع: اضغطي «+» تحت أي يوم واختاري وصفة، أو من صفحة أي وصفة اضغطي «للقائمة الأسبوعية».'}</p>
+  <p class="stat">${n?`<b>${n}</b> ${n===1?'طبق':'أطباق'} مخططة · ${ids.length} ${ids.length===1?'وصفة':'وصفات'}`:'خطط سفرة كل يوم: سلطة، شوربة، طبقين رئيسيين، حلويات ومقبلات. اضغط «+» تحت أي يوم، أو من صفحة أي وصفة اضغط «للقائمة الأسبوعية».'}</p>
   <div class="acts">${ids.length?`<button class="btn main" type="button" id="wShop">${ico('cart')}مكونات الأسبوع لقائمة المشتريات</button>`:''}
    <button class="btn" type="button" id="wFill">اقترح لي أسبوع</button>
    ${n?`<button class="btn" type="button" id="wCopy">${ico('copy')}نسخ للواتساب</button><button class="btn" type="button" id="wClear">مسح الأسبوع</button>`:''}</div>
  </div></header>
  <main class="wrap weekw"><div class="wdays">${DAYS.map((dn,d)=>`<section class="wday${d===ti?' today':''}"><h3>${dn}${d===ti?'<small>اليوم</small>':''}</h3>
-  ${SLOTS.map(([s,sl])=>`<div class="wslot"><span class="wl">${sl}</span>${(wk[d+s]||[]).map((e,i)=>{const r=e.id&&rById(e.id);return `<span class="went">${r?`<a href="#r-${r.id}">${esc(r.ar)}</a>`:`<span>${esc(e.t||'')}</span>`}<button type="button" data-wdel="${d+s}:${i}" aria-label="حذف">×</button></span>`}).join('')}<button type="button" class="wadd" data-wadd="${d}${s}" aria-label="أضف ${sl} ${dn}">+ أضف</button></div>`).join('')}
+  ${SLOTS.map(([s,sl])=>`<div class="wslot"><span class="wl">${sl}</span>${(wk[d+s]||[]).map((e,i)=>{const r=e.id&&rById(e.id);return `<span class="went">${r?`<a href="#r-${r.id}">${esc(r.ar)}</a>`:`<span>${esc(e.t||'')}</span>`}<button type="button" data-wdel="${d+s}:${i}" aria-label="حذف">×</button></span>`}).join('')}<button type="button" class="wadd" data-wadd="${d}${s}" aria-label="أضف ${sl} ${dn}">+</button></div>`).join('')}
  </section>`).join('')}</div></main>`;
 }
 function weekText(){const o=['قائمة الأسبوع'];DAYS.forEach((dn,d)=>{const l=SLOTS.map(([s,sl])=>{const v=(wk[d+s]||[]).map(e=>e.id?(rById(e.id)||{}).ar:e.t).filter(Boolean);return v.length?sl+': '+v.join('، '):''}).filter(Boolean);if(l.length)o.push('','*'+dn+'*',...l)});return o.join('\n')}
-let wTarget=null;
+let wTarget=null,wSlot='m';
 function pickClose(){$('#wpick').hidden=true;document.body.style.overflow='';if(cur&&!$('#detail').hidden&&$('#dWeek'))$('#dWeek').innerHTML=ico('cal')+(Object.values(wk).flat().some(e=>e.id===cur.id)?'في قائمة الأسبوع':'للقائمة الأسبوعية')}
 function pickOpen(h){$('#wbox').innerHTML=h;$('#wpick').hidden=false;document.body.style.overflow='hidden'}
-function pickSlot(key){wTarget=key;const d=+key[0],sl=SLOTS.find(x=>x[0]===key[1])[1];
+function pickSlot(key){wTarget=key;const d=+key[0],sl=slotName(key[1]);
  pickOpen(`<h2>${DAYS[d]} · ${sl}<button type="button" data-wx aria-label="إغلاق">×</button></h2>
-  <input id="wq" type="search" placeholder="ابحثي عن وصفة…" autocomplete="off" aria-label="بحث"><div class="wres" id="wres"></div>
-  <p class="hint">أو اكتبي شي ثاني (مثلاً: طلب من برا، بواقي أمس):</p><form class="wcust" id="wcf"><input id="wci" aria-label="وجبة أخرى"><button class="btn main" type="submit">أضف</button></form>`);
+  <input id="wq" type="search" placeholder="ابحث عن وصفة…" autocomplete="off" aria-label="بحث"><div class="wres" id="wres"></div>
+  <p class="hint">أو اكتب شي ثاني (مثلاً: طلب من برا، بواقي أمس):</p><form class="wcust" id="wcf"><input id="wci" aria-label="طبق آخر"><button class="btn main" type="submit">أضف</button></form>`);
  wRes('');setTimeout(()=>{const q=$('#wq');if(q&&matchMedia('(min-width:601px)').matches)q.focus()},30)}
-function wRes(v){const terms=norm(v).split(/\s+/).filter(Boolean),fs=fav;
- let rs=R.filter(r=>terms.every(t=>r.idx.includes(t)));if(!terms.length)rs=[...rs.filter(r=>fs.has(r.id)),...rs.filter(r=>!fs.has(r.id))];
- $('#wres').innerHTML=rs.slice(0,60).map(r=>`<button type="button" data-wpick="${r.id}">${esc(r.ar)}<small>${esc(mealOf(r))}${fs.has(r.id)?' · ♥':''}</small></button>`).join('')||'<p class="hint">ما في نتائج.</p>'}
-function pickRecipe(r){
- const on=(d,s)=>(wk[d+s]||[]).some(e=>e.id===r.id);
- pickOpen(`<h2>«${esc(r.ar)}» لأي يوم؟<button type="button" data-wx aria-label="إغلاق">×</button></h2>
-  <div class="wgrid"><i></i>${SLOTS.map(x=>`<span>${x[1]}</span>`).join('')}${DAYS.map((dn,d)=>`<b>${dn}</b>${SLOTS.map(([s,sl])=>`<button type="button" class="${on(d,s)?'on':''}" data-wtog="${d}${s}" aria-pressed="${on(d,s)}" aria-label="${dn} ${sl}">${on(d,s)?'✓':'+'}</button>`).join('')}`).join('')}</div>
-  <p class="hint" style="margin-top:12px">اضغطي على اليوم والوجبة. <a href="#week">افتحي قائمة الأسبوع</a></p>`);wTarget=r.id}
-function wFill(){const used=new Set(wIds()),pool=m=>R.filter(r=>m.includes(mealOf(r))&&!used.has(r.id));let k=0;
- const take=m=>{const p=pool(m);if(!p.length)return null;const r=p[Math.floor(Math.random()*p.length)];used.add(r.id);return r};
- for(let d=0;d<7;d++){if(!(wk[d+'l']||[]).length){const r=take(['أطباق رئيسية']);if(r){wcell(d,'l').push({id:r.id});k++}}
-  if(!(wk[d+'d']||[]).length){const r=take(['سلطات','أطباق صحية','شوربات','مقبلات']);if(r){wcell(d,'d').push({id:r.id});k++}}}
- saveWk();weekView();toast(k?`انضافت ${k} وجبة للأيام الفاضية`:'الأسبوع مليان')}
+function wRes(v){const terms=norm(v).split(/\s+/).filter(Boolean),cats=SLOTS.find(x=>x[0]===wTarget[1])[2],inC=r=>cats.includes(mealOf(r)),rank=r=>(inC(r)?0:2)+(fav.has(r.id)?0:1);
+ let rs=R.filter(r=>terms.length?terms.every(t=>r.idx.includes(t)):inC(r));rs=rs.map((r,i)=>[r,i]).sort((a,b)=>rank(a[0])-rank(b[0])||a[1]-b[1]).map(x=>x[0]);
+ $('#wres').innerHTML=rs.slice(0,80).map(r=>`<button type="button" data-wpick="${r.id}">${esc(r.ar)}<small>${esc(mealOf(r))}${fav.has(r.id)?' · ♥':''}</small></button>`).join('')||'<p class="hint">ما في وصفات في هذا القسم، ابحث بالاسم أو اكتب الطبق تحت.</p>'}
+function pickRecipe(r,s){wTarget=r.id;if(s)wSlot=s;else{wSlot=slotOf(r)}
+ const on=d=>(wk[d+wSlot]||[]).some(e=>e.id===r.id);
+ pickOpen(`<h2>«${esc(r.ar)}»<button type="button" data-wx aria-label="إغلاق">×</button></h2>
+  <p class="hint">في أي قسم من السفرة؟</p><div class="wsl">${SLOTS.map(([k,sl])=>`<button type="button" data-wsl="${k}" aria-pressed="${k===wSlot}">${sl}</button>`).join('')}</div>
+  <p class="hint" style="margin-top:14px">ولأي يوم؟</p><div class="wdg">${DAYS.map((dn,d)=>`<button type="button" class="${on(d)?'on':''}" data-wtog="${d}" aria-pressed="${on(d)}">${on(d)?'✓ ':''}${dn}</button>`).join('')}</div>
+  <p class="hint" style="margin-top:12px"><a href="#week">افتح قائمة الأسبوع</a></p>`)}
+function wFill(){const used=new Set(wIds());let k=0;
+ const take=cats=>{const p=R.filter(r=>cats.includes(mealOf(r))&&!used.has(r.id));if(!p.length)return null;const r=p[Math.floor(Math.random()*p.length)];used.add(r.id);return r};
+ for(let d=0;d<7;d++)SLOTS.forEach(([s,,cats])=>{if(!(wk[d+s]||[]).length){const r=take(cats);if(r){wcell(d,s).push({id:r.id});k++}}});
+ saveWk();weekView();toast(k?`انضاف ${k} طبق للأماكن الفاضية`:'الأسبوع مليان')}
 $('#week').addEventListener('click',e=>{
  const a=e.target.closest('[data-wadd]');if(a){pickSlot(a.dataset.wadd);return}
  const x=e.target.closest('[data-wdel]');if(x){const[k,i]=x.dataset.wdel.split(':');(wk[k]||[]).splice(+i,1);saveWk();weekView();return}
@@ -677,13 +689,14 @@ $('#week').addEventListener('click',e=>{
  if(id==='wShop'){wIds().forEach(i=>sel.add(i));store.set('hr_sel',[...sel]);toast('انضافت مكونات الأسبوع');location.hash='#shop'}
  else if(id==='wCopy')copy(weekText());
  else if(id==='wFill')wFill();
- else if(id==='wClear'){if(confirm('تمسحين كل وجبات الأسبوع؟')){wk={};saveWk();weekView()}}
+ else if(id==='wClear'){if(confirm('تمسح كل أطباق الأسبوع؟')){wk={};saveWk();weekView()}}
 });
 $('#wpick').addEventListener('click',e=>{
  if(e.target.id==='wpick'||e.target.closest('[data-wx]')){pickClose();return}
  if(e.target.closest('a[href="#week"]')){pickClose();return}
- const p=e.target.closest('[data-wpick]');if(p){wcell(+wTarget[0],wTarget[1]).push({id:+p.dataset.wpick});saveWk();pickClose();weekView();toast('انضافت');return}
- const t=e.target.closest('[data-wtog]');if(t){const k=t.dataset.wtog,l=wcell(+k[0],k[1]),i=l.findIndex(x=>x.id===wTarget);if(i>-1)l.splice(i,1);else l.push({id:wTarget});saveWk();pickRecipe(rById(wTarget));toast(i>-1?'انشالت من الأسبوع':'انضافت لـ'+DAYS[+k[0]]);return}
+ const p=e.target.closest('[data-wpick]');if(p){wcell(+wTarget[0],wTarget[1]).push({id:+p.dataset.wpick});saveWk();pickClose();weekView();toast('انضاف');return}
+ const sb=e.target.closest('[data-wsl]');if(sb){pickRecipe(rById(wTarget),sb.dataset.wsl);return}
+ const t=e.target.closest('[data-wtog]');if(t){const d=+t.dataset.wtog,l=wcell(d,wSlot),i=l.findIndex(x=>x.id===wTarget);if(i>-1)l.splice(i,1);else l.push({id:wTarget});saveWk();pickRecipe(rById(wTarget),wSlot);toast(i>-1?'انشال من '+DAYS[d]:'انضاف لـ'+DAYS[d]+' · '+slotName(wSlot));return}
 });
 $('#wpick').addEventListener('input',e=>{if(e.target.id==='wq')wRes(e.target.value)});
 $('#wpick').addEventListener('submit',e=>{e.preventDefault();const v=$('#wci').value.trim();if(!v)return;wcell(+wTarget[0],wTarget[1]).push({t:v});saveWk();pickClose();weekView()});
