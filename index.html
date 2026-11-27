@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>من هناك وهناك — وصفات بالعربي والإنجليزي والهندي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Serif+Devanagari:wght@600;700&family=Hind:wght@400;500;600&family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Serif+Devanagari:wght@600;700&family=Hind:wght@400;500;600&family=Hind+Siliguri:wght@400;600&family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: editorial and calm, in the spirit of NYT Cooking / Serious Eats: paper, ink, hairlines, one warm signal colour.
    IDEA: a modern cooking magazine index: each dish gets a tinted plate tile in its category colour, like a styled photo set.
@@ -271,6 +271,9 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
  #cookGo{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));inset-inline:16px;z-index:40;justify-content:center;min-height:52px;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
  body.has-tray #cookGo{bottom:calc(76px + env(safe-area-inset-bottom))}
 }
+.langsel{display:none;height:34px;border:1px solid var(--line);border-radius:99px;background:var(--bg,#fff);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:0 12px;margin-inline-end:6px}
+[lang=am]{font-family:"Noto Sans Ethiopic","Nyala","Abyssinica SIL",sans-serif}
+@media(max-width:600px){.langs{display:none}.langsel{display:block;height:32px;font-size:13px;padding:0 8px}}
 </style>
 </head>
 <body>
@@ -301,7 +304,7 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
 </svg>
 
 <nav class="topnav"><div class="wrap nav-in"><a class="logo" href="#all"><span class="mark">م</span><span>من هناك وهناك<small>وصفات بالعربي والإنجليزي والهندي</small></span></a>
-<div class="nav-l"><div class="langs" role="group" aria-label="لغة الوصفات"><button type="button" data-lang="ar">عربي</button><button type="button" data-lang="en" lang="en">English</button><button type="button" data-lang="hi">هندي</button></div><a href="#all" class="nl hide-s">الوصفات</a><a href="#shop" class="nl"><svg aria-hidden="true"><use href="#i-cart"/></svg><span class="hide-s">قائمة المشتريات</span><b id="navN"></b></a></div></div></nav>
+<div class="nav-l"><div class="langs" role="group" aria-label="لغة الوصفات"><button type="button" data-lang="ar">عربي</button><button type="button" data-lang="en" lang="en">English</button><button type="button" data-lang="hi">هندي</button><button type="button" data-lang="am">أمهري</button><button type="button" data-lang="om">أورومو</button></div><select class="langsel" aria-label="لغة الوصفات"><option value="ar">عربي</option><option value="en">English</option><option value="hi">هندي</option><option value="am">أمهري</option><option value="om">أورومو</option></select><a href="#all" class="nl hide-s">الوصفات</a><a href="#shop" class="nl"><svg aria-hidden="true"><use href="#i-cart"/></svg><span class="hide-s">قائمة المشتريات</span><b id="navN"></b></a></div></div></nav>
 <div id="list">
 <header class="hero-w">
  <div class="wrap hero">
@@ -359,7 +362,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const norm=s=>s.toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');
-const lang=s=>/[ঀ-৿]/.test(s)?'bn':/[ऀ-ॿ]/.test(s)?'hi':(/[A-Za-z]/.test(s)&&!/[؀-ۿ]/.test(s))?'en':'ar';
+const lang=s=>/[\u1200-\u137F]/.test(s)?'am':/[ঀ-৿]/.test(s)?'bn':/[ऀ-ॿ]/.test(s)?'hi':(/[A-Za-z]/.test(s)&&!/[؀-ۿ]/.test(s))?'en':'ar';
 const txt=s=>{const l=lang(s);return l==='ar'?`<span lang="ar">${esc(s)}</span>`:`<span lang="${l}" class="ltr">${esc(s)}</span>`};
 const dr=s=>lang(s)==='ar'?'rtl':'ltr';
 const CAT={tried:'try','دجاج':'chk','لحم':'meat','ربيان':'sea','سمك':'sea','أرز':'rice','فرن':'oven','صوص':'sauce',all:'all',fav:'fav'};
@@ -446,15 +449,18 @@ function shopText(){const items=aggregate().filter(i=>!i.d),o=['قائمة ال�
 let view=store.get('hr_view','grid');
 let tried=store.get('hr_tried',{});const saveTried=()=>store.set('hr_tried',tried);
 let fav=new Set(store.get('hr_fav',[])),filter=store.get('hr_filter','all'),q='',cur=null,ck=0;
+/*ETH*/const ETH={};
+R.forEach(r=>{const e=ETH[r.id];if(e){if(e.am)r.L.am=e.am;if(e.om)r.L.om=e.om}});
+/*ETHEND*/
 let ulang=store.get('hr_lang','ar');
-const LBL={ar:{ing:'المكونات',st:'الطريقة'},en:{ing:'Ingredients',st:'Method'},hi:{ing:'सामग्री',st:'बनाने का तरीका'}};
-function applyLang(){R.forEach(r=>{const L=ulang==='hi'?{t:r.hi0,blocks:r.B0}:r.L[ulang];r.blocks=L.blocks;r.hi=ulang==='ar'?'':L.t;
+const LBL={ar:{ing:'المكونات',st:'الطريقة'},en:{ing:'Ingredients',st:'Method'},hi:{ing:'सामग्री',st:'बनाने का तरीका'},am:{ing:'ግብዓቶች',st:'አዘገጃጀት'},om:{ing:'Wantoota barbaachisan',st:'Qophii'}};
+function applyLang(){R.forEach(r=>{const L=ulang==='hi'?{t:r.hi0,blocks:r.B0}:(r.L[ulang]||r.L.en);r.blocks=L.blocks;r.hi=ulang==='ar'?'':L.t;
  r.steps=r.blocks.filter(b=>b.t==='step').flatMap(b=>b.items.map(x=>({h:b.h,x})));});
- document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===ulang))}
+ document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===ulang));const ls=document.querySelector('.langsel');if(ls)ls.value=ulang}
 R.forEach(r=>{
  r.B0=r.blocks;r.hi0=r.hi;
  r.nI=r.blocks.filter(b=>b.t==='ing').reduce((a,b)=>a+b.items.length,0);
- r.idx=norm([r.ar,r.hi,r.L.en.t,...r.tags,...[r.blocks,r.L.ar.blocks,r.L.en.blocks].flatMap(bs=>bs.flatMap(b=>b.items||[b.x]))].join(' '));
+ r.idx=norm([r.ar,r.hi,r.L.en.t,...r.tags,...[r.blocks,r.L.ar.blocks,r.L.en.blocks,...(r.L.am?[r.L.am.blocks]:[]),...(r.L.om?[r.L.om.blocks]:[])].flatMap(bs=>bs.flatMap(b=>b.items||[b.x]))].join(' '));
 });
 const prog=id=>store.get('hr_p'+id,{i:[],s:[]});
 const saveProg=(id,p)=>store.set('hr_p'+id,p);
@@ -581,7 +587,8 @@ $('#cookN').addEventListener('click',cookNext);
 $('#cookP').addEventListener('click',()=>{if(ck>0){ck--;cookShow()}});
 $('#cookX').addEventListener('click',cookClose);
 document.addEventListener('keydown',e=>{if($('#cook').hidden)return;if(e.key==='Escape')cookClose();else if(e.key==='ArrowLeft')cookNext();else if(e.key==='ArrowRight'&&ck>0){ck--;cookShow()}});
-document.querySelector('.langs').addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(!b)return;ulang=b.dataset.lang;store.set('hr_lang',ulang);applyLang();$('#cook').hidden=true;route();toast({ar:'الوصفات بالعربي',en:'Recipes in English',hi:'الوصفات بالهندي'}[ulang])});
+document.querySelector('.langs').addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(!b)return;ulang=b.dataset.lang;store.set('hr_lang',ulang);applyLang();$('#cook').hidden=true;route();toast({ar:'الوصفات بالعربي',en:'Recipes in English',hi:'الوصفات بالهندي',am:'የምግብ አዘገጃጀቶች በአማርኛ',om:'Qophiiwwan Afaan Oromootiin'}[ulang])});
+document.querySelector('.langsel').addEventListener('change',e=>{const b=document.querySelector('.langs [data-lang="'+e.target.value+'"]');if(b)b.click()});
 addEventListener('hashchange',route);
 applyLang();route();
 }
