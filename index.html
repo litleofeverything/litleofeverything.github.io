@@ -715,7 +715,7 @@ function wFill(){const used=new Set(wIds());let k=0;
 let h2p=null;
 const loadH2p=()=>h2p||(h2p=new Promise((ok,no)=>{if(window.html2pdf)return ok();const s=document.createElement('script');s.src='js/html2pdf.bundle.min.js';s.onload=ok;s.onerror=()=>{h2p=null;no()};document.head.append(s)}));
 async function weekPdf(){
- const w=W(),used=SLOTS.filter(([s])=>w.days.some((_,d)=>(wk[d+s]||[]).length));if(!used.length)return;
+ const w=W(),used=SLOTS;if(!SLOTS.some(([s])=>w.days.some((_,d)=>(wk[d+s]||[]).length)))return;
  const b=$('#wPdf'),bl=b&&b.querySelector('span');if(b){b.disabled=true;bl.textContent=w.pdfWait}
  const cell=(d,s)=>(wk[d+s]||[]).map(e=>e.id?rName(rById(e.id)||{ar:''}):e.t).filter(Boolean).map(x=>`<div style="padding:2px 0">${esc(x)}</div>`).join('');
  const st='border:1px solid #d9d2c7;padding:7px 8px;vertical-align:top;font-size:12px;line-height:1.5;text-align:start';
