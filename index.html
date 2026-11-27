@@ -484,19 +484,18 @@ function shopView(){
  const rs=R.filter(r=>sel.has(r.id)),items=aggregate(),buy=items.filter(i=>!i.d).length,have=items.length-buy;
  const rn=id=>(R.find(r=>r.id===id)||{}).ar||'';
  const row=i=>`<div class="sitem${i.d?' done':''}" data-k="${esc(i.k)}"><div class="srow"><input type="checkbox" data-done ${i.d?'checked':''} aria-label="متوفر في البيت" title="متوفر في البيت"><input type="text" data-edit value="${esc(i.x)}" dir="${dr(i.x)}" aria-label="الغرض">${i.src.length?`<span class="cnt">${i.src.length>1?i.src.length+' مرات':''}</span>`:''}<button type="button" class="x" data-del aria-label="حذف">×</button></div>
-  ${i.src.length?`<details class="src"><summary>${[...new Set(i.src.map(s=>rn(s.r)))].length} ${[...new Set(i.src.map(s=>s.r))].length===1?'وصفة':'وصفات'} · الكميات</summary><ul>${i.src.map(s=>`<li><b>${esc(rn(s.r))}:</b> ${esc(s.x)}</li>`).join('')}</ul></details>`:''}</div>`;
+  ${i.src.length?`<details class="src"><summary>الكميات</summary><ul>${i.src.map(s=>`<li>${esc(s.x)}</li>`).join('')}</ul></details>`:''}</div>`;
  const cats=Object.keys(CATS).map(c=>({c,list:items.filter(i=>i.c===c&&!(hideDone&&i.d))})).filter(g=>g.list.length);
  $('#shop').innerHTML=`<header class="band alt"><div class="wrap dtop">
   <a class="back" href="#all">→ كل الوصفات</a><h1>قائمة المشتريات</h1>
   <p class="stat">${rs.length||items.length?`<b>${buy}</b> للشراء · ${have} متوفر في البيت`:'ما اخترتي وصفات للحين.'}</p>
-  ${rs.length?`<div class="picked">${rs.map(r=>`<span class="pk"><a href="#r-${r.id}">${esc(r.ar)}</a><button type="button" data-unsel="${r.id}" aria-label="شيلي الوصفة">×</button></span>`).join('')}</div>`:''}
   ${items.length?`<div class="acts"><button class="btn main" type="button" id="sCopy">${ico('copy')}نسخ القائمة للواتساب</button>
    <button class="btn" type="button" id="sHide" aria-pressed="${hideDone}">${hideDone?'إظهار المتوفر':'إخفاء المتوفر'}</button>
    <button class="btn" type="button" id="sReset">رجّعي القائمة الأصلية</button>
    <button class="btn" type="button" id="sClear">مسح الكل</button></div>`:''}
  </div></header>
  <main class="wrap shopw">
-  ${rs.length||items.length?`<p class="hint" style="margin:0">المكونات مجمّعة حسب نوعها من كل الوصفات المختارة. علّمي ✓ على المتوفر في البيت، واكتبي الكمية اللي تبينها جنب أي غرض. «الكميات» تعرض كم تحتاج كل وصفة.</p>
+  ${rs.length||items.length?`<p class="hint" style="margin:0">المكونات مجمّعة حسب نوعها من كل الوصفات المختارة. علّمي ✓ على المتوفر في البيت، واكتبي الكمية اللي تبينها جنب أي غرض. «الكميات» تعرض الكميات المطلوبة لهذا الغرض.</p>
   <form class="addf" id="addF"><input id="addI" placeholder="أضيفي غرض… مثلاً: كيس رز ٥ كيلو" aria-label="غرض جديد"><button class="btn main" type="submit">أضيفي</button></form>
   ${cats.map(g=>`<section class="sgrp"><h3>${CATS[g.c]}<span class="cnt">${g.list.length}</span></h3>${g.list.map(row).join('')}</section>`).join('')||'<p class="hint">كل الأغراض متوفرة 👌</p>'}`
   :`<p class="empty">اضغطي زر العربة على أي وصفة (أو أكثر) وتطلع مكوناتها هنا مجمّعة حسب النوع: لحوم، ألبان، خضار، بهارات…<br><a class="btn main" href="#all" style="margin-top:14px">اختاري الوصفات</a></p>`}
