@@ -310,6 +310,14 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
 .wdg button{border:1px solid var(--line);background:var(--bg);border-radius:12px;min-height:46px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer}
 .wdg button.on{background:var(--herb);border-color:var(--herb);color:#fff}
 .wadd{min-width:44px}
+.weekb{position:absolute;top:10px;width:40px;height:40px;border:0;border-radius:50%;background:color-mix(in srgb,var(--bg) 92%,transparent);display:grid;place-items:center;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.12);inset-inline-end:106px}
+.weekb svg{width:19px;height:19px}
+.favb,.cartb,.weekb{z-index:3}
+.weekb[aria-pressed=true]{background:var(--acc);color:#fff}
+.card .weekb{width:34px;height:34px;top:8px;inset-inline-end:88px}
+.card .weekb svg{width:16px;height:16px}
+.v-list .weekb,.v-text .weekb{top:50%;transform:translateY(-50%);box-shadow:none;border:1px solid var(--line);inset-inline-end:44px}
+@media(max-width:600px){.card .weekb{width:32px;height:32px;top:6px;inset-inline-end:78px}.card .weekb svg{width:15px;height:15px}}
 .wcust{display:flex;gap:8px;margin-top:8px}
 .wcust input{flex:1}
 @media(max-width:600px){.wpick{align-items:end;padding:0}.wbox{border-radius:20px 20px 0 0;max-height:88vh;width:100%}.wdays{grid-template-columns:1fr}.weekw{padding-block:16px 100px}}
@@ -340,6 +348,7 @@ html{-webkit-text-size-adjust:100%}a,button{-webkit-tap-highlight-color:transpar
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></g></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-tg" viewBox="0 0 24 24"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
 </svg>
 
@@ -526,6 +535,7 @@ function list(){
  $('#grid').innerHTML=rs.length?rs.map((r,i)=>{const p=prog(r.id),d=p.s.length,tot=r.steps.length;return `<a class="card${sel.has(r.id)?' sel':''}${lead&&i===0?' lead':''}" href="#r-${r.id}">
   <div class="media">${rtile(r)}${tried[r.id]&&tried[r.id].d?`<span class="tbadge">${ico('check')}جرّبتها</span>`:''}
   <button type="button" class="cartb" data-sel="${r.id}" aria-pressed="${sel.has(r.id)}" aria-label="قائمة المشتريات" title="أضيفي لقائمة المشتريات">${ico(sel.has(r.id)?'check':'cart')}</button>
+  <button type="button" class="weekb" data-wk="${r.id}" aria-pressed="${inWeek(r.id)}" aria-label="للقائمة الأسبوعية" title="للقائمة الأسبوعية">${ico('cal')}</button>
   <button type="button" class="favb" data-fav="${r.id}" aria-label="المفضلة" aria-pressed="${fav.has(r.id)}">${ico(fav.has(r.id)?'heartf':'heart')}</button></div>
   <div class="cb"><p class="kicker">${r.tags.map(esc).join(' · ')}</p><h3>${esc(r.ar)}</h3><div class="hi">${txt(r.hi)}</div>
   <div class="meta">${r.nI?`<span>${ico('list')}${r.nI} مكوّن</span>`:''}<span>${ico('pot')}${tot?tot+' خطوة':'طريقة بالفيديو'}</span>${r.videos.length?`<span>${ico('play')}فيديو</span>`:''}</div>
@@ -598,7 +608,7 @@ $('#q').addEventListener('input',e=>{q=e.target.value;list()});
 $('#sf').addEventListener('submit',e=>e.preventDefault());
 $('#meals').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;meal=b.dataset.m;store.set('hr_meal',meal);list()});
 $('#chips').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;store.set('hr_filter',filter);list()});
-$('#grid').addEventListener('click',e=>{const s=e.target.closest('[data-sel]');if(s){e.preventDefault();toggleSel(+s.dataset.sel);list();return}const b=e.target.closest('[data-fav]');if(!b)return;e.preventDefault();toggleFav(+b.dataset.fav);list()});
+$('#grid').addEventListener('click',e=>{const w=e.target.closest('[data-wk]');if(w){e.preventDefault();pickRecipe(rById(+w.dataset.wk));return}const s=e.target.closest('[data-sel]');if(s){e.preventDefault();toggleSel(+s.dataset.sel);list();return}const b=e.target.closest('[data-fav]');if(!b)return;e.preventDefault();toggleFav(+b.dataset.fav);list()});
 $('#rnd').addEventListener('click',()=>{const pool=[...document.querySelectorAll('#grid .card')];const a=pool[Math.floor(Math.random()*pool.length)];if(a)location.hash=a.getAttribute('href')});
 $('#detail').addEventListener('input',e=>{if(e.target.id!=='myNote')return;const o=tried[cur.id]||{};o.n=e.target.value;tried[cur.id]=o;saveTried();$('#nSaved').textContent='انحفظت ✓'});
 $('#detail').addEventListener('change',e=>{const c=e.target.closest('[data-i]');if(!c)return;const k=+c.dataset.i,p=prog(cur.id);p.i=p.i.filter(x=>x!==k);if(c.checked)p.i.push(k);saveProg(cur.id,p);c.parentElement.classList.toggle('ok',c.checked)});
@@ -645,6 +655,7 @@ const saveWk=()=>store.set('hr_week',wk);
 const todayI=()=>(new Date().getDay()+1)%7;
 const wcell=(d,s)=>(wk[d+s]=wk[d+s]||[]);
 const rById=id=>R.find(r=>r.id===id);
+const inWeek=id=>Object.values(wk).some(l=>l.some(e=>e.id===id));
 const wCount=()=>Object.values(wk).reduce((a,l)=>a+l.length,0);
 const wIds=()=>[...new Set(Object.values(wk).flat().filter(e=>e.id&&rById(e.id)).map(e=>e.id))];
 function weekView(){
@@ -654,7 +665,7 @@ function weekView(){
   <p class="stat">${n?`<b>${n}</b> ${n===1?'طبق':'أطباق'} مخططة · ${ids.length} ${ids.length===1?'وصفة':'وصفات'}`:'خطط سفرة كل يوم: سلطة، شوربة، طبقين رئيسيين، حلويات ومقبلات. اضغط «+» تحت أي يوم، أو من صفحة أي وصفة اضغط «للقائمة الأسبوعية».'}</p>
   <div class="acts">${ids.length?`<button class="btn main" type="button" id="wShop">${ico('cart')}مكونات الأسبوع لقائمة المشتريات</button>`:''}
    <button class="btn" type="button" id="wFill">اقترح لي أسبوع</button>
-   ${n?`<button class="btn" type="button" id="wCopy">${ico('copy')}نسخ للواتساب</button><button class="btn" type="button" id="wClear">مسح الأسبوع</button>`:''}</div>
+   ${n?`<button class="btn" type="button" id="wPdf">${ico('down')}تنزيل PDF</button><button class="btn" type="button" id="wCopy">${ico('copy')}نسخ للواتساب</button><button class="btn" type="button" id="wClear">مسح الأسبوع</button>`:''}</div>
  </div></header>
  <main class="wrap weekw"><div class="wdays">${DAYS.map((dn,d)=>`<section class="wday${d===ti?' today':''}"><h3>${dn}${d===ti?'<small>اليوم</small>':''}</h3>
   ${SLOTS.map(([s,sl])=>`<div class="wslot"><span class="wl">${sl}</span>${(wk[d+s]||[]).map((e,i)=>{const r=e.id&&rById(e.id);return `<span class="went">${r?`<a href="#r-${r.id}">${esc(r.ar)}</a>`:`<span>${esc(e.t||'')}</span>`}<button type="button" data-wdel="${d+s}:${i}" aria-label="حذف">×</button></span>`}).join('')}<button type="button" class="wadd" data-wadd="${d}${s}" aria-label="أضف ${sl} ${dn}">+</button></div>`).join('')}
@@ -662,7 +673,7 @@ function weekView(){
 }
 function weekText(){const o=['قائمة الأسبوع'];DAYS.forEach((dn,d)=>{const l=SLOTS.map(([s,sl])=>{const v=(wk[d+s]||[]).map(e=>e.id?(rById(e.id)||{}).ar:e.t).filter(Boolean);return v.length?sl+': '+v.join('، '):''}).filter(Boolean);if(l.length)o.push('','*'+dn+'*',...l)});return o.join('\n')}
 let wTarget=null,wSlot='m';
-function pickClose(){$('#wpick').hidden=true;document.body.style.overflow='';if(cur&&!$('#detail').hidden&&$('#dWeek'))$('#dWeek').innerHTML=ico('cal')+(Object.values(wk).flat().some(e=>e.id===cur.id)?'في قائمة الأسبوع':'للقائمة الأسبوعية')}
+function pickClose(){$('#wpick').hidden=true;document.body.style.overflow='';if(!$('#list').hidden)list();if(cur&&!$('#detail').hidden&&$('#dWeek'))$('#dWeek').innerHTML=ico('cal')+(Object.values(wk).flat().some(e=>e.id===cur.id)?'في قائمة الأسبوع':'للقائمة الأسبوعية')}
 function pickOpen(h){$('#wbox').innerHTML=h;$('#wpick').hidden=false;document.body.style.overflow='hidden'}
 function pickSlot(key){wTarget=key;const d=+key[0],sl=slotName(key[1]);
  pickOpen(`<h2>${DAYS[d]} · ${sl}<button type="button" data-wx aria-label="إغلاق">×</button></h2>
@@ -682,12 +693,32 @@ function wFill(){const used=new Set(wIds());let k=0;
  const take=cats=>{const p=R.filter(r=>cats.includes(mealOf(r))&&!used.has(r.id));if(!p.length)return null;const r=p[Math.floor(Math.random()*p.length)];used.add(r.id);return r};
  for(let d=0;d<7;d++)SLOTS.forEach(([s,,cats])=>{if(!(wk[d+s]||[]).length){const r=take(cats);if(r){wcell(d,s).push({id:r.id});k++}}});
  saveWk();weekView();toast(k?`انضاف ${k} طبق للأماكن الفاضية`:'الأسبوع مليان')}
+
+let h2p=null;
+const loadH2p=()=>h2p||(h2p=new Promise((ok,no)=>{if(window.html2pdf)return ok();const s=document.createElement('script');s.src='js/html2pdf.bundle.min.js';s.onload=ok;s.onerror=()=>{h2p=null;no()};document.head.append(s)}));
+async function weekPdf(){
+ const used=SLOTS.filter(([s])=>DAYS.some((_,d)=>(wk[d+s]||[]).length));if(!used.length)return;
+ const b=$('#wPdf');if(b){b.disabled=true;b.lastChild.textContent='جاري التجهيز…'}
+ const cell=(d,s)=>(wk[d+s]||[]).map(e=>e.id?(rById(e.id)||{}).ar:e.t).filter(Boolean).map(x=>`<div style="padding:2px 0">${esc(x)}</div>`).join('');
+ const st='border:1px solid #d9d2c7;padding:7px 8px;vertical-align:top;font-size:12px;line-height:1.5';
+ const el=document.createElement('div');el.dir='rtl';
+ el.style.cssText='width:1060px;padding:18px 20px;background:#fff;color:#1d1a16;font-family:"IBM Plex Sans Arabic",system-ui,sans-serif';
+ el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><div style="font-size:26px;font-weight:700">قائمة الأسبوع</div><div style="font-size:13px;color:#8a8175">من هناك وهناك · litleofeverything.github.io</div></div>
+ <table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr><th style="${st};width:82px;background:#c4511c;color:#fff"></th>${used.map(([,sl])=>`<th style="${st};background:#c4511c;color:#fff;font-size:13px;text-align:center">${sl}</th>`).join('')}</tr></thead>
+ <tbody>${DAYS.map((dn,d)=>`<tr style="page-break-inside:avoid"><th style="${st};background:#f6f1ea;font-size:13px">${dn}</th>${used.map(([s])=>`<td style="${st}">${cell(d,s)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+ try{await loadH2p();
+  await html2pdf().set({margin:[8,8,8,8],filename:'قائمة-الأسبوع.pdf',image:{type:'jpeg',quality:.96},html2canvas:{scale:2,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','avoid-all']}}).from(el).save();
+  toast('تنزّلت القائمة PDF')}
+ catch(err){toast('ما قدرت أجهز الملف، جرب مرة ثانية')}
+ if(b){b.disabled=false;b.lastChild.textContent='تنزيل PDF'}
+}
 $('#week').addEventListener('click',e=>{
  const a=e.target.closest('[data-wadd]');if(a){pickSlot(a.dataset.wadd);return}
  const x=e.target.closest('[data-wdel]');if(x){const[k,i]=x.dataset.wdel.split(':');(wk[k]||[]).splice(+i,1);saveWk();weekView();return}
  const id=e.target.closest('button')?.id;
  if(id==='wShop'){wIds().forEach(i=>sel.add(i));store.set('hr_sel',[...sel]);toast('انضافت مكونات الأسبوع');location.hash='#shop'}
  else if(id==='wCopy')copy(weekText());
+ else if(id==='wPdf')weekPdf();
  else if(id==='wFill')wFill();
  else if(id==='wClear'){if(confirm('تمسح كل أطباق الأسبوع؟')){wk={};saveWk();weekView()}}
 });
