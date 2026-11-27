@@ -74,7 +74,7 @@ a{color:inherit}button{font:inherit;color:inherit;cursor:pointer}
 /* tiles */
 .tile{position:relative;display:grid;place-items:center;overflow:hidden;background:var(--tt);color:var(--ti)}
 .tile::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.55),transparent 55%),radial-gradient(circle,currentColor 1px,transparent 1.5px) 0 0/14px 14px;opacity:.18}
-.tile .plate{position:absolute;height:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75) 0 58%,rgba(255,255,255,.35) 59% 70%,transparent 71%);box-shadow:0 18px 30px -18px rgba(60,30,10,.45)}
+.tile.t-photo::before,.tile.t-photo .plate{display:none}.tile.t-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.tile .plate{position:absolute;height:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75) 0 58%,rgba(255,255,255,.35) 59% 70%,transparent 71%);box-shadow:0 18px 30px -18px rgba(60,30,10,.45)}
 :root[data-theme=dark] .tile .plate{background:radial-gradient(circle,rgba(255,255,255,.08) 0 58%,rgba(255,255,255,.04) 59% 70%,transparent 71%)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tile .plate{background:radial-gradient(circle,rgba(255,255,255,.08) 0 58%,rgba(255,255,255,.04) 59% 70%,transparent 71%)}}
 .tile svg.dish{position:relative;height:42%;aspect-ratio:1;width:auto}
@@ -364,7 +364,7 @@ const txt=s=>{const l=lang(s);return l==='ar'?`<span lang="ar">${esc(s)}</span>`
 const dr=s=>lang(s)==='ar'?'rtl':'ltr';
 const CAT={tried:'try','دجاج':'chk','لحم':'meat','ربيان':'sea','سمك':'sea','أرز':'rice','فرن':'oven','صوص':'sauce',all:'all',fav:'fav'};
 const catOf=r=>CAT[['ربيان','سمك','لحم','فرن','أرز','صوص','دجاج'].find(t=>r.tags.includes(t))]||'all';
-const tile=(c,cls='')=>`<div class="tile t-${c} ${cls}"><span class="plate"></span><svg class="dish" aria-hidden="true"><use href="#d-${c}"/></svg></div>`;
+const IMGS={4:1,6:2,7:3,8:4,9:5,11:6,12:7,13:8,14:9,15:10};const rtile=r=>IMGS[r.id]?`<div class="tile t-photo"><img src="images/${IMGS[r.id]}-r-${r.id}.jpg" alt="${esc(r.ar||'')}" loading="lazy"></div>`:tile(catOf(r));const tile=(c,cls='')=>`<div class="tile t-${c} ${cls}"><span class="plate"></span><svg class="dish" aria-hidden="true"><use href="#d-${c}"/></svg></div>`;
 const ico=(id,c='')=>`<svg class="${c}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const CATS={p:'لحوم ودواجن وبحري',d:'ألبان وأجبان وبيض',v:'خضار وفواكه',h:'أعشاب طازجة',g:'رز وحبوب وخبز',s:'بهارات وتوابل',c:'صوصات ومعلبات ومرق',o:'زيوت وسمن',m:'أدوات وأخرى',u:'غير مصنّف',z:'إضافاتك'};
 const B='(?:^|[\\s،,(/+–-])';
@@ -476,7 +476,7 @@ function list(){
  const lead=filter==='all'&&!q&&view==='grid';
  $('#grid').className='grid v-'+view;document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===view));
  $('#grid').innerHTML=rs.length?rs.map((r,i)=>{const p=prog(r.id),d=p.s.length,tot=r.steps.length;return `<a class="card${sel.has(r.id)?' sel':''}${lead&&i===0?' lead':''}" href="#r-${r.id}">
-  <div class="media">${tile(catOf(r))}${tried[r.id]&&tried[r.id].d?`<span class="tbadge">${ico('check')}جرّبتها</span>`:''}
+  <div class="media">${rtile(r)}${tried[r.id]&&tried[r.id].d?`<span class="tbadge">${ico('check')}جرّبتها</span>`:''}
   <button type="button" class="cartb" data-sel="${r.id}" aria-pressed="${sel.has(r.id)}" aria-label="قائمة المشتريات" title="أضيفي لقائمة المشتريات">${ico(sel.has(r.id)?'check':'cart')}</button>
   <button type="button" class="favb" data-fav="${r.id}" aria-label="المفضلة" aria-pressed="${fav.has(r.id)}">${ico(fav.has(r.id)?'heartf':'heart')}</button></div>
   <div class="cb"><p class="kicker">${r.tags.map(esc).join(' · ')}</p><h3>${esc(r.ar)}</h3><div class="hi">${txt(r.hi)}</div>
@@ -506,7 +506,7 @@ function detail(r){
    ${r.notg?'':`<a class="btn" href="https://t.me/Hindirecipes/${r.id}" target="_blank" rel="noopener">${ico('tg')}تيليجرام</a>`}
   </div>
   ${r.steps.length?`<div class="prog"><span id="pT"></span><div class="bar"><i id="pB"></i></div><button type="button" class="reset" id="rst">ابدئي من جديد</button></div>`:''}
- </div>${r.videos.length?`<a class="vtile" href="${esc(r.videos[0])}" target="_blank" rel="noopener" aria-label="شاهدي فيديو الطريقة">${tile(catOf(r))}<span class="vplay">${ico('play')}<b>شاهدي الفيديو</b></span></a>`:tile(catOf(r))}</div></header>
+ </div>${r.videos.length?`<a class="vtile" href="${esc(r.videos[0])}" target="_blank" rel="noopener" aria-label="شاهدي فيديو الطريقة">${rtile(r)}<span class="vplay">${ico('play')}<b>شاهدي الفيديو</b></span></a>`:rtile(r)}</div></header>
  <main class="wrap body">
   <section class="mynotes"><h3>ملاحظاتي على الوصفة<span id="nSaved"></span></h3><textarea id="myNote" placeholder="مثلاً: زيدي الملح، خففي الكريمة، تكفي ٤ أشخاص، الأولاد حبوها…" aria-label="ملاحظاتي">${esc((tried[r.id]&&tried[r.id].n)||'')}</textarea></section>
   ${notes.length?`<div class="notes">${notes.map(n=>`<div class="note${n.ar?' ar':''}" dir="${dr(n.x)}">${n.ar?'':ico('warn')}<div>${txt(n.x)}</div></div>`).join('')}</div>`:''}
