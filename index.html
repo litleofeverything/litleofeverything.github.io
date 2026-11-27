@@ -503,7 +503,6 @@ function detail(r){
    <button class="btn${tried[r.id]&&tried[r.id].d?' tried':''}" type="button" id="dTry" aria-pressed="${!!(tried[r.id]&&tried[r.id].d)}">${ico('check')}${tried[r.id]&&tried[r.id].d?'جرّبتها · '+esc(tried[r.id].d):'جرّبتها؟'}</button>
    <button class="btn" type="button" id="dFav" aria-pressed="${fav.has(r.id)}">${ico(fav.has(r.id)?'heartf':'heart')}${fav.has(r.id)?'محفوظة':'احفظي'}</button>
    <button class="btn" type="button" id="dCopy">${ico('copy')}نسخ</button>
-   ${r.notg?'':`<a class="btn" href="https://t.me/Hindirecipes/${r.id}" target="_blank" rel="noopener">${ico('tg')}تيليجرام</a>`}
   </div>
   ${r.steps.length?`<div class="prog"><span id="pT"></span><div class="bar"><i id="pB"></i></div><button type="button" class="reset" id="rst">ابدئي من جديد</button></div>`:''}
  </div>${r.videos.length?`<a class="vtile" href="${esc(r.videos[0])}" target="_blank" rel="noopener" aria-label="شاهدي فيديو الطريقة">${rtile(r)}<span class="vplay">${ico('play')}<b>شاهدي الفيديو</b></span></a>`:rtile(r)}</div></header>
