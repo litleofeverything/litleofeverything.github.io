@@ -74,7 +74,7 @@ a{color:inherit}button{font:inherit;color:inherit;cursor:pointer}
 /* tiles */
 .tile{position:relative;display:grid;place-items:center;overflow:hidden;background:var(--tt);color:var(--ti)}
 .tile::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.55),transparent 55%),radial-gradient(circle,currentColor 1px,transparent 1.5px) 0 0/14px 14px;opacity:.18}
-.tile.t-photo::before,.tile.t-photo .plate{display:none}.tile.t-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.tile .plate{position:absolute;height:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75) 0 58%,rgba(255,255,255,.35) 59% 70%,transparent 71%);box-shadow:0 18px 30px -18px rgba(60,30,10,.45)}
+.tile.t-photo::before,.tile.t-photo .plate{display:none}.tile.t-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}.tile.t-photo::before{display:block;content:'';position:absolute;inset:-12%;background:var(--bg) center/cover;filter:blur(16px) saturate(1.1)}.tile .plate{position:absolute;height:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75) 0 58%,rgba(255,255,255,.35) 59% 70%,transparent 71%);box-shadow:0 18px 30px -18px rgba(60,30,10,.45)}
 :root[data-theme=dark] .tile .plate{background:radial-gradient(circle,rgba(255,255,255,.08) 0 58%,rgba(255,255,255,.04) 59% 70%,transparent 71%)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tile .plate{background:radial-gradient(circle,rgba(255,255,255,.08) 0 58%,rgba(255,255,255,.04) 59% 70%,transparent 71%)}}
 .tile svg.dish{position:relative;height:42%;aspect-ratio:1;width:auto}
@@ -364,7 +364,7 @@ const txt=s=>{const l=lang(s);return l==='ar'?`<span lang="ar">${esc(s)}</span>`
 const dr=s=>lang(s)==='ar'?'rtl':'ltr';
 const CAT={tried:'try','دجاج':'chk','لحم':'meat','ربيان':'sea','سمك':'sea','أرز':'rice','فرن':'oven','صوص':'sauce',all:'all',fav:'fav'};
 const catOf=r=>CAT[['ربيان','سمك','لحم','فرن','أرز','صوص','دجاج'].find(t=>r.tags.includes(t))]||'all';
-const IMGS={18:1,19:2,21:3,22:4,24:5,25:6,26:7,27:8,29:9,31:10,4:1,6:2,7:3,8:4,9:5,11:6,12:7,13:8,14:9,15:10};const rtile=r=>IMGS[r.id]?`<div class="tile t-photo"><img src="images/${IMGS[r.id]}-r-${r.id}.jpg" alt="${esc(r.ar||'')}" loading="lazy"></div>`:tile(catOf(r));const tile=(c,cls='')=>`<div class="tile t-${c} ${cls}"><span class="plate"></span><svg class="dish" aria-hidden="true"><use href="#d-${c}"/></svg></div>`;
+const IMGS={32:1,33:2,35:3,36:4,37:5,40:6,41:7,42:8,43:9,44:10,18:1,19:2,21:3,22:4,24:5,25:6,26:7,27:8,29:9,31:10,4:1,6:2,7:3,8:4,9:5,11:6,12:7,13:8,14:9,15:10};const rtile=r=>IMGS[r.id]?`<div class="tile t-photo" style="--bg:url(images/${IMGS[r.id]}-r-${r.id}.jpg)"><img src="images/${IMGS[r.id]}-r-${r.id}.jpg" alt="${esc(r.ar||'')}" loading="lazy"></div>`:tile(catOf(r));const tile=(c,cls='')=>`<div class="tile t-${c} ${cls}"><span class="plate"></span><svg class="dish" aria-hidden="true"><use href="#d-${c}"/></svg></div>`;
 const ico=(id,c='')=>`<svg class="${c}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const CATS={p:'لحوم ودواجن وبحري',d:'ألبان وأجبان وبيض',v:'خضار وفواكه',h:'أعشاب طازجة',g:'رز وحبوب وخبز',s:'بهارات وتوابل',c:'صوصات ومعلبات ومرق',o:'زيوت وسمن',m:'أدوات وأخرى',u:'غير مصنّف',z:'إضافاتك'};
 const B='(?:^|[\\s،,(/+–-])';
