@@ -845,22 +845,32 @@ applyLang();route();
 .hro-dr{background:var(--paper,#fafafa);border:1px dashed var(--acc,#b5532a);border-radius:8px;padding:10px;margin-top:8px}
 .hro-dr h4{margin:0 0 6px}.hro-dr ul,.hro-dr ol{margin:4px 0;padding-inline-start:22px}
 .hro-m{color:var(--mut,#777);font-size:13px}
+#hro-btn.nav{position:static;inset:auto;margin-inline-end:6px;flex:none}
 </style>
 <script type="module" id="hr-owner-js">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
-import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
-import{getFirestore,collection,addDoc,onSnapshot,query,orderBy,updateDoc,doc,serverTimestamp}from'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 const OWNER='afra.almurar@gmail.com';
-const app=initializeApp({apiKey:"AIzaSyCJ6E_IVx_tJF1mW9fxMYPB2kCHNfxl87I",authDomain:"recipes-litleofeverything.firebaseapp.com",projectId:"recipes-litleofeverything",storageBucket:"recipes-litleofeverything.firebasestorage.app",messagingSenderId:"1021834073491",appId:"1:1021834073491:web:9ebed65b14f5bb8f940466"});
-const auth=getAuth(app),db=getFirestore(app);
-const T={ar:{in:'دخول',out:'خروج',title:'إضافة وصفة',ph:'الصق رابط الوصفة هنا',add:'إضافة',no:'هذا الحساب غير مصرح له.',st:{pending:'بانتظار المعالجة',processing:'قيد التجهيز',draft:'المسودة جاهزة',held:'متوقفة',approved:'تم الاعتماد',published:'منشورة',edit_requested:'طلب تعديل'},ap:'اعتماد ونشر',ed:'طلب تعديل',edph:'ما التعديل المطلوب؟',send:'إرسال',ing:'المكونات',steps:'الطريقة',empty:'لا توجد طلبات بعد.',close:'إغلاق',bad:'رابط غير صالح',err:'تعذر الحفظ'},
-en:{in:'Sign in',out:'Sign out',title:'Add a recipe',ph:'Paste the recipe link here',add:'Add',no:'This account is not authorized.',st:{pending:'Pending',processing:'In preparation',draft:'Draft ready',held:'On hold',approved:'Approved',published:'Published',edit_requested:'Edit requested'},ap:'Approve and publish',ed:'Request edit',edph:'What should change?',send:'Send',ing:'Ingredients',steps:'Steps',empty:'No requests yet.',close:'Close',bad:'Invalid link',err:'Could not save'}};
+const CFG={apiKey:"AIzaSyCJ6E_IVx_tJF1mW9fxMYPB2kCHNfxl87I",authDomain:"recipes-litleofeverything.firebaseapp.com",projectId:"recipes-litleofeverything",storageBucket:"recipes-litleofeverything.firebasestorage.app",messagingSenderId:"1021834073491",appId:"1:1021834073491:web:9ebed65b14f5bb8f940466"};
+const T={ar:{in:'دخول',out:'خروج',title:'إضافة وصفة',ph:'الصق رابط الوصفة هنا',add:'إضافة',no:'هذا الحساب غير مصرح له.',st:{pending:'بانتظار المعالجة',processing:'قيد التجهيز',draft:'المسودة جاهزة',held:'متوقفة',approved:'تم الاعتماد',published:'منشورة',edit_requested:'طلب تعديل'},ap:'اعتماد ونشر',ed:'طلب تعديل',edph:'ما التعديل المطلوب؟',send:'إرسال',ing:'المكونات',steps:'الطريقة',empty:'لا توجد طلبات بعد.',close:'إغلاق',bad:'رابط غير صالح',err:'تعذر الحفظ',net:'تعذر تحميل خدمة الدخول، حاولي مرة أخرى'},
+en:{in:'Sign in',out:'Sign out',title:'Add a recipe',ph:'Paste the recipe link here',add:'Add',no:'This account is not authorized.',st:{pending:'Pending',processing:'In preparation',draft:'Draft ready',held:'On hold',approved:'Approved',published:'Published',edit_requested:'Edit requested'},ap:'Approve and publish',ed:'Request edit',edph:'What should change?',send:'Send',ing:'Ingredients',steps:'Steps',empty:'No requests yet.',close:'Close',bad:'Invalid link',err:'Could not save',net:'Could not load the sign-in service, try again'}};
 const L=()=>T[document.documentElement.lang]||T.en;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const btn=document.createElement('button');btn.id='hro-btn';btn.type='button';
 const pan=document.createElement('div');pan.id='hro-p';pan.innerHTML='<div id="hro-in"></div>';
-document.body.append(btn,pan);
-let user=null,items=[],unsub=null,open=false;
+const navL=document.querySelector('.nav-l');
+if(navL){btn.classList.add('nav');navL.insertAdjacentElement('afterbegin',btn);document.body.append(pan)}else{document.body.append(btn,pan)}
+let user=null,items=[],unsub=null,open=false,FB=null,fbBusy=null;
+async function initFB(){if(FB)return Promise.resolve(FB);if(fbBusy)return fbBusy;
+fbBusy=(async()=>{const[appM,authM,fsM]=await Promise.all([
+import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js'),
+import('https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js'),
+import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js')]);
+const app=appM.initializeApp(CFG);
+const auth=authM.getAuth(app),db=fsM.getFirestore(app);
+FB={auth,db,...authM,...fsM};
+FB.onAuthStateChanged(auth,u=>{user=u;watch();render()});
+FB.getRedirectResult(auth).catch(()=>{});
+return FB})();
+try{return await fbBusy}finally{fbBusy=null}}
 const isOwner=()=>user&&user.email===OWNER&&user.emailVerified;
 function top(){btn.textContent=user?L().title:L().in;btn.hidden=false}
 function render(){top();const b=pan.querySelector('#hro-in');if(!open){pan.classList.remove('on');return}pan.classList.add('on');
@@ -881,24 +891,26 @@ if(d.status==='draft'){h+='<button class="pri" data-a="approve" data-id="'+it.id
 h+='</div>'}
 h+='<button data-a="out">'+esc(t.out)+'</button>'}
 h+='<button data-a="close">'+esc(t.close)+'</button>';b.innerHTML=h}
-function watch(){if(unsub){unsub();unsub=null}items=[];if(!isOwner())return;
-unsub=onSnapshot(query(collection(db,'intake'),orderBy('createdAt','desc')),s=>{items=s.docs.map(x=>({id:x.id,d:x.data()}));render()},()=>{})}
-onAuthStateChanged(auth,u=>{user=u;watch();render()});
-getRedirectResult(auth).catch(()=>{});
+function watch(){if(!FB)return;if(unsub){unsub();unsub=null}items=[];if(!isOwner())return;
+unsub=FB.onSnapshot(FB.query(FB.collection(FB.db,'intake'),FB.orderBy('createdAt','desc')),s=>{items=s.docs.map(x=>({id:x.id,d:x.data()}));render()},()=>{})}
 btn.onclick=()=>{open=true;render()};
 pan.addEventListener('click',async e=>{const a=e.target.closest('[data-a]');if(e.target===pan){open=false;render();return}if(!a||a.tagName==='FORM')return;
 const k=a.dataset.a,id=a.dataset.id;
 if(k==='close'){open=false;render()}
-else if(k==='login'){const p=new GoogleAuthProvider();try{await signInWithPopup(auth,p)}catch(x){try{await signInWithRedirect(auth,p)}catch(y){}}}
-else if(k==='out'){await signOut(auth)}
-else if(k==='approve'){await updateDoc(doc(db,'intake',id),{status:'approved',approvedAt:serverTimestamp()})}
-else if(k==='edit'){const n=prompt(L().edph);if(n)await updateDoc(doc(db,'intake',id),{status:'edit_requested',editNote:n})}});
+else if(k==='login'){let F;try{F=await initFB()}catch(x){alert(L().net);return}
+const p=new F.GoogleAuthProvider();try{await F.signInWithPopup(F.auth,p)}catch(x){try{await F.signInWithRedirect(F.auth,p)}catch(y){}}}
+else if(k==='out'){if(FB)await FB.signOut(FB.auth)}
+else if(k==='approve'){if(FB)await FB.updateDoc(FB.doc(FB.db,'intake',id),{status:'approved',approvedAt:FB.serverTimestamp()})}
+else if(k==='edit'){const n=prompt(L().edph);if(n&&FB)await FB.updateDoc(FB.doc(FB.db,'intake',id),{status:'edit_requested',editNote:n})}});
 pan.addEventListener('submit',async e=>{e.preventDefault();const u=e.target.u.value.trim();
 if(!/^https?:\/\//i.test(u)){alert(L().bad);return}
-try{await addDoc(collection(db,'intake'),{url:u,status:'pending',createdAt:serverTimestamp(),owner:OWNER});e.target.reset()}catch(x){alert(L().err)}});
+try{const F=await initFB();await F.addDoc(F.collection(F.db,'intake'),{url:u,status:'pending',createdAt:F.serverTimestamp(),owner:OWNER});e.target.reset()}catch(x){alert(L().err)}});
 new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+initFB().catch(()=>{});
 top();
 </script>
+
+
 
 </body>
 </html>
